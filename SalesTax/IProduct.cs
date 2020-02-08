@@ -4,13 +4,13 @@ using System.Linq;
 
 namespace SalesTax
 {
-    public enum ProductCategoryDescription
+    public static class ProductCategoryDescription
     {
-        Book,
-        Medical,
-        Food,
-        Imported,
-        Other
+        public const string Book = "Book";
+        public const string Medical = "Medical";
+        public const string Food = "Food";
+        public const string Imported = "Imported";
+        public const string Other = "Other";
     }
 
     public interface IProductCategory
