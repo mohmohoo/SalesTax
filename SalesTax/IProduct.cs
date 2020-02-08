@@ -126,6 +126,7 @@ namespace SalesTax
     }
 
     public class Basket
+        : IBasket
     {
         public IProduct[] Products { get; set; }
 
