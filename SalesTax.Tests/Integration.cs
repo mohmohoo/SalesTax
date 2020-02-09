@@ -39,7 +39,7 @@ namespace SalesTax.Tests
             var importedTaxLiabilities = new TaxLiability { Category = importedCategory, Taxes = new[] { importedTax } };
             var otherTaxLiabilities = new TaxLiability { Category = otherCategory, Taxes = new[] { basicTax } };
 
-            target = new Application(bookTaxLiabilities,
+            target = new SalesTaxApplication(bookTaxLiabilities,
                 foodTaxLiabilities,
                 medicalTaxLiabilities,
                 importedTaxLiabilities,
