@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -100,8 +101,43 @@ namespace SalesTax
 
         public IReceipt ApplyTaxes(IBasket basket)
         {
-           
-            throw new System.NotImplementedException();
+            var receipt = new Receipt();
+            foreach(var product in basket.Products)
+            {
+                var taxes = ProductCategoryTaxLiabilities
+                    .SingleOrDefault(taxLiability =>
+                        product
+                            .Categories
+                            .Any(category => taxLiability.Category.Description == category.Description))?.Taxes ?? new ITax[] { };
+
+                var totalTaxRate = 1 + taxes.Aggregate(0f, (soFar, currentTax) => soFar + currentTax.Rate);
+                receipt.ProductSummary = receipt
+                    .ProductSummary
+                    .Concat(new[] { $"1 {product.Description}: £{Math.Round(totalTaxRate * product.Price, 2)}" })
+                    .ToArray();
+            }
+            
+
+            var salesTax = basket
+                .Products
+                .Select(product => {
+                    var taxes = ProductCategoryTaxLiabilities
+                        .SingleOrDefault(taxLiability =>
+                            product
+                                .Categories
+                                .Any(category => taxLiability.Category.Description == category.Description))?.Taxes ?? new ITax[] { };
+
+                    return (product.Price, taxes);
+                })
+                .Aggregate(0f, (soFar, priceWithTaxes) => {
+                    return priceWithTaxes.taxes.Sum(tax => tax.Rate * priceWithTaxes.Price);
+                });
+
+            receipt.SaleTaxesDescription = $"Sale Taxes: £{salesTax}";
+
+            var total = basket.Products.Sum(product => product.Price) + salesTax;
+            receipt.TotalDescription = $"Total: £{total}";
+            return receipt;
         }
     }
 
