@@ -56,8 +56,8 @@ namespace SalesTax.Tests
             var basket = new Basket(book, musicCd, chocoletBar);
 
             var reciept = target.ApplyTaxes(basket);
-            //Assert.AreEqual("Sale Taxes: £1.50", reciept.SaleTaxesDescription);
-            //Assert.AreEqual("Total: £23.83", reciept.TotalDescription);
+            Assert.AreEqual("Sale Taxes: £1.50", reciept.SaleTaxesDescription);
+            Assert.AreEqual("Total: £29.83", reciept.TotalDescription);
 
             Assert.NotNull(reciept.ProductSummary);
             Assert.AreEqual(3, reciept.ProductSummary.Length);

@@ -102,6 +102,8 @@ namespace SalesTax
         public IReceipt ApplyTaxes(IBasket basket)
         {
             var receipt = new Receipt();
+            var totalWithTaxes = 0d;
+
             foreach(var product in basket.Products)
             {
                 var taxes = ProductCategoryTaxLiabilities
@@ -111,32 +113,17 @@ namespace SalesTax
                             .Any(category => taxLiability.Category.Description == category.Description))?.Taxes ?? new ITax[] { };
 
                 var totalTaxRate = 1 + taxes.Aggregate(0f, (soFar, currentTax) => soFar + currentTax.Rate);
+                totalWithTaxes += Math.Round(totalTaxRate * product.Price, 2);
                 receipt.ProductSummary = receipt
                     .ProductSummary
-                    .Concat(new[] { $"1 {product.Description}: £{Math.Round(totalTaxRate * product.Price, 2)}" })
+                    .Concat(new[] { $"1 {product.Description}: £{Math.Round(product.Price * totalTaxRate, 2).ToString("0.00")}" })
                     .ToArray();
             }
             
 
-            var salesTax = basket
-                .Products
-                .Select(product => {
-                    var taxes = ProductCategoryTaxLiabilities
-                        .SingleOrDefault(taxLiability =>
-                            product
-                                .Categories
-                                .Any(category => taxLiability.Category.Description == category.Description))?.Taxes ?? new ITax[] { };
-
-                    return (product.Price, taxes);
-                })
-                .Aggregate(0f, (soFar, priceWithTaxes) => {
-                    return priceWithTaxes.taxes.Sum(tax => tax.Rate * priceWithTaxes.Price);
-                });
-
-            receipt.SaleTaxesDescription = $"Sale Taxes: £{salesTax}";
-
-            var total = basket.Products.Sum(product => product.Price) + salesTax;
-            receipt.TotalDescription = $"Total: £{total}";
+            var taxesOnly = totalWithTaxes - basket.Products.Sum(product => product.Price);
+            receipt.SaleTaxesDescription = $"Sale Taxes: £{Math.Round(taxesOnly, 2).ToString("0.00")}";
+            receipt.TotalDescription = $"Total: £{totalWithTaxes}";
             return receipt;
         }
     }
