@@ -16,21 +16,16 @@ namespace SalesTax
     public interface IProductCategory
     {
         string Description { get; }
-    }
 
-    public interface ITaxExemptCategory
-        : IProductCategory
-    {
+        ITax[] TaxLiabilities { get; set; }
     }
-
-    public interface IImportedCategory
-        : IProductCategory
-    { }
 
     public class ProductCategory
         : IProductCategory
     {
         public string Description { get; set; }
+
+        public ITax[] TaxLiabilities { get; set; }
     }
 
     public interface IProduct
@@ -51,58 +46,61 @@ namespace SalesTax
 
         public IReadOnlyCollection<IProductCategory> Categories { get; }
 
-        public Product(bool isImported, params IProductCategory[] productCategories)
+        public Product()
         {
-            var _productCategories = productCategories ?? new ProductCategory[] { };
-            var _categories = isImported
-                ? new IProductCategory[] { new ProductCategory { Description = ProductCategoryDescription.Imported } }
-                    .Concat(_productCategories)
-                : new IProductCategory[] { }.Concat(_productCategories);
+            Categories = new IProductCategory[] { };
+        }
 
-            Categories = _categories.ToArray();
+        public Product(params IProductCategory[] productCategories)
+            : this()
+        {
+            Categories = productCategories
+                    .Concat(Categories)
+                    .ToArray();
         }
     }
 
     public interface ITaxLiability
     {
-        void Define(IProductCategory category, params ITax[] taxes);
+        IProductCategory Category { get; }
 
-        ITax[] For(IProductCategory category);
+        ITax[] Taxes { get; }
     }
 
     public class TaxLiability
         : ITaxLiability
     {
-        public void Define(IProductCategory category, params ITax[] taxes)
-        {
-            throw new System.NotImplementedException();
-        }
+        
+        public IProductCategory Category { get; set; }
 
-        public ITax[] For(IProductCategory category)
+        public ITax[] Taxes { get; set; }
+
+        public TaxLiability()
         {
-            throw new System.NotImplementedException();
+            Taxes = new ITax[] { };
         }
     }
 
     public interface ITaxApplier
     {
-        ITaxLiability ProductCategoryTaxLiabilities { get; }
+        ITaxLiability[] ProductCategoryTaxLiabilities { get; }
 
-        IReceipt ApplyTaxes(IBasket product);
+        IReceipt ApplyTaxes(IBasket basket);
     }
 
     public class Application
         : ITaxApplier
     {
-        public ITaxLiability ProductCategoryTaxLiabilities { get; }
+        public ITaxLiability[] ProductCategoryTaxLiabilities { get; }
 
-        public Application(ITaxLiability productCategoryTaxLiabilities)
+        public Application(params ITaxLiability[] productCategoryTaxLiabilities)
         {
             ProductCategoryTaxLiabilities = productCategoryTaxLiabilities;
         }
 
-        public IReceipt ApplyTaxes(IBasket product)
+        public IReceipt ApplyTaxes(IBasket basket)
         {
+           
             throw new System.NotImplementedException();
         }
     }

@@ -4,6 +4,12 @@ namespace SalesTax.Tests
 {
     public class Integration
     {
+        IProductCategory bookCategory;
+        IProductCategory foodCategory;
+        IProductCategory medicalCategory;
+        IProductCategory importedCategory;
+        IProductCategory otherCategory;
+
         ITaxApplier target; 
 
         [SetUp]
@@ -21,29 +27,31 @@ namespace SalesTax.Tests
                 Rate = 0.05f
             };
 
-            var bookCategory = new ProductCategory { Description = ProductCategoryDescription.Book };
-            var foodCategory = new ProductCategory { Description = ProductCategoryDescription.Food };
-            var medicalCategory = new ProductCategory { Description = ProductCategoryDescription.Medical };
-            var importedCategory = new ProductCategory { Description = ProductCategoryDescription.Imported };
-            var otherCategory = new ProductCategory { Description = ProductCategoryDescription.Other };
+            bookCategory = new ProductCategory { Description = ProductCategoryDescription.Book };
+            foodCategory = new ProductCategory { Description = ProductCategoryDescription.Food };
+            medicalCategory = new ProductCategory { Description = ProductCategoryDescription.Medical };
+            importedCategory = new ProductCategory { Description = ProductCategoryDescription.Imported };
+            otherCategory = new ProductCategory { Description = ProductCategoryDescription.Other };
 
-            var productTaxLiabilities = new TaxLiability();
+            var bookTaxLiabilities = new TaxLiability { Category = bookCategory };
+            var foodTaxLiabilities = new TaxLiability { Category = foodCategory };
+            var medicalTaxLiabilities = new TaxLiability { Category = medicalCategory };
+            var importedTaxLiabilities = new TaxLiability { Category = importedCategory, Taxes = new[] { importedTax } };
+            var otherTaxLiabilities = new TaxLiability { Category = otherCategory, Taxes = new[] { basicTax } };
 
-            productTaxLiabilities.Define(bookCategory);
-            productTaxLiabilities.Define(foodCategory);
-            productTaxLiabilities.Define(medicalCategory);
-            productTaxLiabilities.Define(importedCategory, importedTax);
-            productTaxLiabilities.Define(otherCategory, basicTax);
-
-            target = new Application(productTaxLiabilities);
+            target = new Application(bookTaxLiabilities,
+                foodTaxLiabilities,
+                medicalTaxLiabilities,
+                importedTaxLiabilities,
+                otherTaxLiabilities);
         }
 
         [Test]
         public void Scenario1Test()
         {
-            var book = new Product(false) { Description = "Book", Price = 12.49f };
-            var musicCd = new Product(false) { Description = "Music CD", Price = 14.99f };
-            var chocoletBar = new Product(false) { Description = "Chocolate Bar", Price = 0.85f };
+            var book = new Product(bookCategory) { Description = "Book", Price = 12.49f };
+            var musicCd = new Product(otherCategory) { Description = "Music CD", Price = 14.99f };
+            var chocoletBar = new Product(foodCategory) { Description = "Chocolate Bar", Price = 0.85f };
 
             var basket = new Basket(book, musicCd, chocoletBar);
 
