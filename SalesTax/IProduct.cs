@@ -13,8 +13,4 @@ namespace SalesTax
 
         IReadOnlyCollection<IProductCategory> Categories { get; }
     }
-
-    
-
-    
 }
